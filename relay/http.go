@@ -145,6 +145,7 @@ func (h *HTTP) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	queryParams := r.URL.Query()
+	var payload = ""
 
 	// Don't pass through non create queries
 	if isQuery {
@@ -159,6 +160,8 @@ func (h *HTTP) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			if !ok {
 				jsonError(w, http.StatusBadRequest, "query not supported, relay only supports CREATE DATABASE queries")
 				return
+			} else {
+				payload = "{\"results\":[{\"statement_id\":0}]}"
 			}
 		}
 	}
@@ -260,6 +263,9 @@ func (h *HTTP) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		switch resp.StatusCode / 100 {
 		case 2:
 			w.WriteHeader(resp.StatusCode)
+			if payload != "" {
+				w.Write([]byte(payload))
+			}
 			return
 
 		case 4:
